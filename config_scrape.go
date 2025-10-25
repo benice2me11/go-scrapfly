@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	js_scenario "github.com/scrapfly/go-scrapfly/scenario"
 )
 
 type ProxyPool string
@@ -46,8 +48,6 @@ const (
 	OnlyContent FormatOption = "only_content"
 )
 
-type JSScenarioStep map[string]interface{}
-
 // ScrapeConfig holds all the parameters for a scrape request.
 type ScrapeConfig struct {
 	URL                         string
@@ -85,7 +85,7 @@ type ScrapeConfig struct {
 	Screenshots                 map[string]string
 	ScreenshotFlags             []ScreenshotFlag
 	JS                          string
-	JSScenario                  []JSScenarioStep
+	JSScenario                  []js_scenario.JSScenarioStep
 	OS                          string
 	Lang                        []string
 }

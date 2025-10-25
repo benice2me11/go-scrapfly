@@ -9,22 +9,49 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// VerifyAPIKeyResult represents the result of an API key verification.
 type VerifyAPIKeyResult struct {
+	// Valid indicates whether the API key is valid.
 	Valid bool `json:"valid"`
 }
 
-// ScrapeResult represents the result of a scrape call.
+// ScrapeResult represents the complete response from a scrape request.
+//
+// It contains the scraped content, metadata, configuration, and context
+// information about the request. The result includes details about the
+// upstream response, proxy used, cost, and more.
 type ScrapeResult struct {
-	Config  ConfigData  `json:"config"`
+	// Config contains the configuration used for this scrape request.
+	Config ConfigData `json:"config"`
+	// Context contains metadata about the request execution.
 	Context ContextData `json:"context"`
-	Result  ResultData  `json:"result"`
-	UUID    string      `json:"uuid"`
+	// Result contains the scraped content and response data.
+	Result ResultData `json:"result"`
+	// UUID is the unique identifier for this scrape request.
+	UUID string `json:"uuid"`
 
 	selector *goquery.Document // For lazy loading
 }
 
-// Selector provides a go-query document for parsing the HTML content.
-// It is lazy-loaded and cached.
+// Selector provides a goquery document for parsing HTML content.
+//
+// The selector is lazy-loaded and cached, making it efficient to call
+// multiple times. It can only be used with HTML content.
+//
+// Example:
+//
+//	result, err := client.Scrape(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	doc, err := result.Selector()
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	title := doc.Find("title").First().Text()
+//	fmt.Println(title)
 func (r *ScrapeResult) Selector() (*goquery.Document, error) {
 	if r.selector != nil {
 		return r.selector, nil
@@ -43,17 +70,22 @@ func (r *ScrapeResult) Selector() (*goquery.Document, error) {
 	return r.selector, nil
 }
 
-// ScreenshotResult represents a screenshot taken by the API.
+// ScreenshotResult represents a screenshot captured by the API.
 type ScreenshotResult struct {
-	Image    []byte
+	// Image contains the raw screenshot image bytes.
+	Image []byte
+	// Metadata contains information about the screenshot.
 	Metadata ScreenshotMetadata
 }
 
-// ScreenshotMetadata contains metadata about the screenshot.
+// ScreenshotMetadata contains metadata about a captured screenshot.
 type ScreenshotMetadata struct {
-	ExtensionName      string
+	// ExtensionName is the file extension (jpg, png, webp, gif).
+	ExtensionName string
+	// UpstreamStatusCode is the HTTP status code from the target website.
 	UpstreamStatusCode int
-	UpstreamURL        string
+	// UpstreamURL is the final URL after any redirects.
+	UpstreamURL string
 }
 
 // newScreenshotResult creates a ScreenshotResult from an HTTP response.
@@ -77,11 +109,14 @@ func newScreenshotResult(resp *http.Response, data []byte) (*ScreenshotResult, e
 	}, nil
 }
 
-// ExtractionResult represents the result of an extraction call.
+// ExtractionResult represents the result of a data extraction request.
 type ExtractionResult struct {
-	Data        interface{} `json:"data"`
-	ContentType string      `json:"content_type"`
-	DataQuality string      `json:"data_quality,omitempty"`
+	// Data contains the extracted structured data.
+	Data interface{} `json:"data"`
+	// ContentType is the content type of the extracted data.
+	ContentType string `json:"content_type"`
+	// DataQuality indicates the quality/confidence of the extraction (if available).
+	DataQuality string `json:"data_quality,omitempty"`
 }
 
 // errorResponse is used to unmarshal generic API errors.
@@ -94,7 +129,8 @@ type errorResponse struct {
 
 // --- Detailed Data Structures ---
 
-// ConfigData mirrors the 'config' object in the API response.
+// ConfigData contains the configuration that was used for a scrape request.
+// This mirrors the 'config' object in the API response.
 type ConfigData struct {
 	URL                string            `json:"url"`
 	Method             string            `json:"method"`
@@ -132,7 +168,8 @@ type ConfigData struct {
 	UUID               string            `json:"uuid"`
 }
 
-// ContextData mirrors the 'context' object in the API response.
+// ContextData contains metadata about the scrape request execution.
+// This includes proxy information, costs, cache status, and more.
 type ContextData struct {
 	ASP               interface{}  `json:"asp"`
 	BandwidthConsumed int          `json:"bandwidth_consumed"`
@@ -162,7 +199,9 @@ type ContextData struct {
 	Webhook          interface{}       `json:"webhook"`
 }
 
-// ResultData mirrors the 'result' object in the API response.
+// ResultData contains the scraped content and response information.
+// This is the main data from the scrape request including HTML content,
+// status codes, headers, cookies, and more.
 type ResultData struct {
 	BrowserData     BrowserData            `json:"browser_data"`
 	Content         string                 `json:"content"`
@@ -191,27 +230,32 @@ type ResultData struct {
 
 // --- Nested Structures for Context and Result ---
 
+// CacheContext contains information about cache usage for the request.
 type CacheContext struct {
 	State string      `json:"state"`
 	Entry interface{} `json:"entry"`
 }
 
+// CostDetail represents a single cost item for a scrape request.
 type CostDetail struct {
 	Amount      int    `json:"amount"`
 	Code        string `json:"code"`
 	Description string `json:"description"`
 }
 
+// CostContext contains the cost breakdown for a scrape request.
 type CostContext struct {
 	Details []CostDetail `json:"details"`
 	Total   int          `json:"total"`
 }
 
+// DebugContext contains URLs for debugging the request.
 type DebugContext struct {
 	ResponseURL   string      `json:"response_url"`
 	ScreenshotURL interface{} `json:"screenshot_url"`
 }
 
+// OSContext contains information about the operating system used for the request.
 type OSContext struct {
 	Distribution string `json:"distribution"`
 	Name         string `json:"name"`
@@ -219,6 +263,7 @@ type OSContext struct {
 	Version      string `json:"version"`
 }
 
+// ProxyContext contains information about the proxy used for the request.
 type ProxyContext struct {
 	Country  string `json:"country"`
 	Identity string `json:"identity"`
@@ -226,6 +271,7 @@ type ProxyContext struct {
 	Pool     string `json:"pool"`
 }
 
+// URIContext contains parsed URI information about the requested URL.
 type URIContext struct {
 	BaseURL    string      `json:"base_url"`
 	Fragment   interface{} `json:"fragment"`
@@ -237,6 +283,7 @@ type URIContext struct {
 	Scheme     string      `json:"scheme"`
 }
 
+// BrowserData contains data collected from the browser during JavaScript rendering.
 type BrowserData struct {
 	JSEvaluationResult *string                `json:"javascript_evaluation_result"`
 	JSScenario         interface{}            `json:"js_scenario"`
@@ -246,6 +293,7 @@ type BrowserData struct {
 	XHRCall            []interface{}          `json:"xhr_call"`
 }
 
+// Cookie represents an HTTP cookie.
 type Cookie struct {
 	Name     string `json:"name"`
 	Value    string `json:"value"`
@@ -260,6 +308,7 @@ type Cookie struct {
 	Size     int    `json:"size"`
 }
 
+// APIErrorDetails contains detailed error information from the API.
 type APIErrorDetails struct {
 	Code      string            `json:"code"`
 	HTTPCode  int               `json:"http_code"`
@@ -269,12 +318,14 @@ type APIErrorDetails struct {
 	DocURL    string            `json:"doc_url"`
 }
 
+// IFrame represents an iframe found in the page.
 type IFrame struct {
 	URL     string     `json:"url"`
 	URI     URIContext `json:"uri"`
 	Content string     `json:"content"`
 }
 
+// Screenshot represents a screenshot captured during rendering.
 type Screenshot struct {
 	CSSSelector *string `json:"css_selector"`
 	Extension   string  `json:"extension"`
@@ -283,7 +334,10 @@ type Screenshot struct {
 	URL         string  `json:"url"`
 }
 
-// AccountData represents account information from Scrapfly.
+// AccountData represents detailed account information from Scrapfly.
+//
+// This includes subscription details, usage statistics, billing information,
+// and account limits.
 type AccountData struct {
 	Account struct {
 		AccountID string `json:"account_id"`

@@ -6,46 +6,85 @@ import (
 	"strings"
 )
 
-// ScreenshotFormat defines the format of the screenshot image.
+// ScreenshotFormat defines the image format for screenshots.
 type ScreenshotFormat string
 
+// Available image formats for screenshot capture.
 const (
-	FormatJPG  ScreenshotFormat = "jpg"
-	FormatPNG  ScreenshotFormat = "png"
+	// FormatJPG captures screenshots in JPEG format (smaller file size, lossy compression).
+	FormatJPG ScreenshotFormat = "jpg"
+	// FormatPNG captures screenshots in PNG format (larger file size, lossless compression).
+	FormatPNG ScreenshotFormat = "png"
+	// FormatWEBP captures screenshots in WebP format (modern format with good compression).
 	FormatWEBP ScreenshotFormat = "webp"
-	FormatGIF  ScreenshotFormat = "gif"
+	// FormatGIF captures screenshots in GIF format (animated screenshots support).
+	FormatGIF ScreenshotFormat = "gif"
 )
 
-// ScreenshotOption defines options to customize screenshot behavior.
+// ScreenshotOption defines options to customize screenshot capture behavior.
 type ScreenshotOption string
 
+// Available options for customizing screenshot capture.
 const (
-	OptionLoadImages       ScreenshotOption = "load_images"
-	OptionDarkMode         ScreenshotOption = "dark_mode"
-	OptionBlockBanners     ScreenshotOption = "block_banners"
+	// OptionLoadImages enables image loading (disabled by default for performance).
+	OptionLoadImages ScreenshotOption = "load_images"
+	// OptionDarkMode enables dark mode rendering.
+	OptionDarkMode ScreenshotOption = "dark_mode"
+	// OptionBlockBanners blocks cookie banners and similar overlays.
+	OptionBlockBanners ScreenshotOption = "block_banners"
+	// OptionPrintMediaFormat uses print media CSS for rendering.
 	OptionPrintMediaFormat ScreenshotOption = "print_media_format"
 )
 
-// ScreenshotConfig holds parameters for a screenshot request.
+// ScreenshotConfig configures a screenshot capture request to the Scrapfly API.
+//
+// This struct contains all available options for customizing screenshot behavior,
+// including format, resolution, capture area, and rendering options.
+//
+// Example:
+//
+//	config := &scrapfly.ScreenshotConfig{
+//	    URL:        "https://example.com",
+//	    Format:     scrapfly.FormatPNG,
+//	    Capture:    "fullpage",
+//	    Resolution: "1920x1080",
+//	    Options:    []scrapfly.ScreenshotOption{scrapfly.OptionBlockBanners},
+//	}
 type ScreenshotConfig struct {
-	URL             string
-	Format          ScreenshotFormat
-	Capture         string // e.g., "fullpage" or a CSS selector
-	Resolution      string // e.g., "1920x1080"
-	Country         string
-	Timeout         int
-	RenderingWait   int
+	// URL is the target URL to capture (required).
+	URL string
+	// Format specifies the image format (jpg, png, webp, gif).
+	Format ScreenshotFormat
+	// Capture defines what to capture: "fullpage" for entire page, or a CSS selector for specific element.
+	Capture string
+	// Resolution sets the viewport size (e.g., "1920x1080").
+	Resolution string
+	// Country specifies the proxy country code (e.g., "us", "uk", "de").
+	Country string
+	// Timeout sets the maximum time in milliseconds to wait for the request.
+	Timeout int
+	// RenderingWait is additional wait time in milliseconds after page load.
+	RenderingWait int
+	// WaitForSelector waits for a CSS selector to appear before capturing.
 	WaitForSelector string
-	Options         []ScreenshotOption
-	AutoScroll      bool
-	JS              string
-	Cache           bool
-	CacheTTL        int
-	CacheClear      bool
-	Webhook         string
+	// Options are additional screenshot options (dark mode, block banners, etc.).
+	Options []ScreenshotOption
+	// AutoScroll automatically scrolls the page to load lazy content.
+	AutoScroll bool
+	// JS is custom JavaScript code to execute before capturing.
+	JS string
+	// Cache enables response caching.
+	Cache bool
+	// CacheTTL sets the cache time-to-live in seconds.
+	CacheTTL int
+	// CacheClear forces cache refresh for this request.
+	CacheClear bool
+	// Webhook is the name of a webhook to call after the request completes.
+	Webhook string
 }
 
-// toAPIParams converts the ScreenshotConfig into URL parameters.
+// toAPIParams converts the ScreenshotConfig into URL parameters for the Scrapfly API.
+// This is an internal method used by the Client to prepare API requests.
 func (c *ScreenshotConfig) toAPIParams() (url.Values, error) {
 	params := url.Values{}
 

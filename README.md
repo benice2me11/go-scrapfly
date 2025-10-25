@@ -1,5 +1,7 @@
 # Scrapfly Go SDK
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/scrapfly/go-scrapfly.svg)](https://pkg.go.dev/github.com/scrapfly/go-scrapfly)
+
 Go SDK for [Scrapfly.io](https://scrapfly.io/) web scraping API.
 
 This SDK allows you to easily:

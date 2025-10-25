@@ -7,12 +7,17 @@ import (
 	"time"
 )
 
-// urlSafeB64Encode encodes data into URL-safe base64.
+// urlSafeB64Encode encodes data into URL-safe base64 format.
+// This is used internally for encoding JS code and other parameters.
 func urlSafeB64Encode(data string) string {
 	return base64.RawURLEncoding.EncodeToString([]byte(data))
 }
 
-// fetchWithRetry performs an HTTP request with a retry mechanism for 5xx errors.
+// fetchWithRetry performs an HTTP request with automatic retry logic for 5xx errors.
+//
+// It retries the request up to the specified number of times with a delay between attempts.
+// Only server errors (5xx status codes) and network errors are retried.
+// The request body must support re-reading via req.GetBody for retries to work properly.
 func fetchWithRetry(client *http.Client, req *http.Request, retries int, delay time.Duration) (*http.Response, error) {
 	var lastErr error
 

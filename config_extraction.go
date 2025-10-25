@@ -6,31 +6,66 @@ import (
 	"net/url"
 )
 
-// CompressionFormat for document compression.
+// CompressionFormat specifies the compression format for document body.
 type CompressionFormat string
 
+// Available compression formats for document body compression.
 const (
-	GZIP    CompressionFormat = "gzip"
-	ZSTD    CompressionFormat = "zstd"
+	// GZIP uses gzip compression (widely supported, good compression ratio).
+	GZIP CompressionFormat = "gzip"
+	// ZSTD uses Zstandard compression (better compression and speed than gzip).
+	ZSTD CompressionFormat = "zstd"
+	// DEFLATE uses DEFLATE compression (older format, similar to gzip).
 	DEFLATE CompressionFormat = "deflate"
 )
 
-// ExtractionConfig holds parameters for an extraction request.
+// ExtractionConfig configures an AI-powered data extraction request to the Scrapfly API.
+//
+// This struct contains all available options for extracting structured data from
+// HTML or other document formats using AI models or predefined templates.
+//
+// Example with template:
+//
+//	config := &scrapfly.ExtractionConfig{
+//	    Body:               []byte("<html>...</html>"),
+//	    ContentType:        "text/html",
+//	    ExtractionTemplate: "product",
+//	}
+//
+// Example with AI prompt:
+//
+//	config := &scrapfly.ExtractionConfig{
+//	    Body:             []byte("<html>...</html>"),
+//	    ContentType:      "text/html",
+//	    ExtractionPrompt: "Extract product name, price, and description",
+//	}
 type ExtractionConfig struct {
-	Body                        []byte
-	ContentType                 string
-	URL                         string
-	Charset                     string
-	ExtractionTemplate          string
+	// Body is the document content to extract data from (required).
+	Body []byte
+	// ContentType specifies the document content type, e.g., "text/html" (required).
+	ContentType string
+	// URL is the original URL of the document (optional, helps with context).
+	URL string
+	// Charset specifies the character encoding of the document.
+	Charset string
+	// ExtractionTemplate is the name of a saved extraction template.
+	ExtractionTemplate string
+	// ExtractionEphemeralTemplate is an inline extraction template definition.
 	ExtractionEphemeralTemplate map[string]interface{}
-	ExtractionPrompt            string
-	ExtractionModel             string
-	IsDocumentCompressed        bool
-	DocumentCompressionFormat   CompressionFormat
-	Webhook                     string
+	// ExtractionPrompt is an AI prompt describing what data to extract.
+	ExtractionPrompt string
+	// ExtractionModel specifies which AI model to use for extraction.
+	ExtractionModel string
+	// IsDocumentCompressed indicates if the Body is compressed.
+	IsDocumentCompressed bool
+	// DocumentCompressionFormat specifies the compression format if IsDocumentCompressed is true.
+	DocumentCompressionFormat CompressionFormat
+	// Webhook is the name of a webhook to call after extraction completes.
+	Webhook string
 }
 
-// toAPIParams converts the ExtractionConfig into URL parameters.
+// toAPIParams converts the ExtractionConfig into URL parameters for the Scrapfly API.
+// This is an internal method used by the Client to prepare API requests.
 func (c *ExtractionConfig) toAPIParams() (url.Values, error) {
 	params := url.Values{}
 

@@ -9,88 +9,161 @@ import (
 	js_scenario "github.com/scrapfly/go-scrapfly/scenario"
 )
 
+// ProxyPool represents the type of proxy pool to use for scraping.
 type ProxyPool string
 
-// Proxy Pools
+// Available proxy pool types for Scrapfly API requests.
 const (
-	PublicDataCenterPool  ProxyPool = "public_datacenter_pool"
+	// PublicDataCenterPool uses datacenter proxies. Fast and reliable but easier to detect.
+	PublicDataCenterPool ProxyPool = "public_datacenter_pool"
+	// PublicResidentialPool uses residential proxies. More expensive but harder to detect.
 	PublicResidentialPool ProxyPool = "public_residential_pool"
 )
 
-// ScreenshotFlags define options for screenshot behavior.
+// ScreenshotFlag defines options for screenshot behavior when using Screenshots parameter.
 type ScreenshotFlag string
 
+// Available screenshot flags for customizing screenshot capture.
 const (
-	LoadImages       ScreenshotFlag = "load_images"
-	DarkMode         ScreenshotFlag = "dark_mode"
-	BlockBanners     ScreenshotFlag = "block_banners"
+	// LoadImages enables image loading for screenshots (disabled by default for performance).
+	LoadImages ScreenshotFlag = "load_images"
+	// DarkMode enables dark mode rendering.
+	DarkMode ScreenshotFlag = "dark_mode"
+	// BlockBanners blocks cookie banners and similar overlays.
+	BlockBanners ScreenshotFlag = "block_banners"
+	// PrintMediaFormat uses print media CSS for rendering.
 	PrintMediaFormat ScreenshotFlag = "print_media_format"
-	HighQuality      ScreenshotFlag = "high_quality"
+	// HighQuality captures screenshots at higher quality settings.
+	HighQuality ScreenshotFlag = "high_quality"
 )
 
-// Format defines the scraped content format.
+// Format defines the format for the scraped content response.
 type Format string
 
+// Available content formats for scrape responses.
 const (
-	FormatJSON      Format = "json"
-	FormatText      Format = "text"
-	FormatMarkdown  Format = "markdown"
+	// FormatJSON returns content structured as JSON.
+	FormatJSON Format = "json"
+	// FormatText returns plain text content with HTML tags stripped.
+	FormatText Format = "text"
+	// FormatMarkdown converts HTML to Markdown format.
+	FormatMarkdown Format = "markdown"
+	// FormatCleanHTML returns cleaned and normalized HTML.
 	FormatCleanHTML Format = "clean_html"
-	FormatRaw       Format = "raw"
+	// FormatRaw returns the raw HTML content without any processing.
+	FormatRaw Format = "raw"
 )
 
-// FormatOption defines options for content formatting.
+// FormatOption defines additional options for content formatting.
 type FormatOption string
 
+// Available format options that can be combined with Format settings.
 const (
-	NoLinks     FormatOption = "no_links"
-	NoImages    FormatOption = "no_images"
+	// NoLinks removes all links from the formatted content.
+	NoLinks FormatOption = "no_links"
+	// NoImages removes all images from the formatted content.
+	NoImages FormatOption = "no_images"
+	// OnlyContent extracts only the main content, removing headers, footers, and navigation.
 	OnlyContent FormatOption = "only_content"
 )
 
-// ScrapeConfig holds all the parameters for a scrape request.
+// ScrapeConfig configures a web scraping request to the Scrapfly API.
+//
+// This struct contains all available options for customizing scraping behavior,
+// including proxy settings, JavaScript rendering, data extraction, and more.
+//
+// Example:
+//
+//	config := &scrapfly.ScrapeConfig{
+//	    URL:      "https://example.com",
+//	    RenderJS: true,
+//	    Country:  "us",
+//	    ASP:      true,
+//	    Cache:    true,
+//	    Format:   scrapfly.FormatMarkdown,
+//	}
 type ScrapeConfig struct {
-	URL                         string
-	Method                      string // GET, POST, PUT, PATCH
-	Body                        string
-	Data                        map[string]interface{}
-	Headers                     map[string]string
-	Cookies                     map[string]string
-	Country                     string
-	ProxyPool                   ProxyPool
-	RenderJS                    bool
-	ASP                         bool
-	Cache                       bool
-	CacheTTL                    int
-	CacheClear                  bool
-	Timeout                     int
-	Retry                       bool
-	Session                     string
-	SessionStickyProxy          bool
-	Tags                        []string
-	Webhook                     string
-	Debug                       bool
-	SSL                         bool
-	DNS                         bool
-	CorrelationID               string
-	Format                      Format
-	FormatOptions               []FormatOption
-	ExtractionTemplate          string
+	// URL is the target URL to scrape (required).
+	URL string
+	// Method is the HTTP method to use (GET, POST, PUT, PATCH). Defaults to GET.
+	Method string
+	// Body is the raw request body for POST/PUT/PATCH requests.
+	Body string
+	// Data is a map that will be encoded as request body based on Content-Type.
+	// Cannot be used together with Body.
+	Data map[string]interface{}
+	// Headers are custom HTTP headers to send with the request.
+	Headers map[string]string
+	// Cookies are cookies to include in the request.
+	Cookies map[string]string
+	// Country specifies the proxy country code (e.g., "us", "uk", "de").
+	Country string
+	// ProxyPool specifies which proxy pool to use.
+	ProxyPool ProxyPool
+	// RenderJS enables JavaScript rendering using a headless browser.
+	RenderJS bool
+	// ASP enables Anti-Scraping Protection bypass.
+	ASP bool
+	// Cache enables response caching.
+	Cache bool
+	// CacheTTL sets the cache time-to-live in seconds.
+	CacheTTL int
+	// CacheClear forces cache refresh for this request.
+	CacheClear bool
+	// Timeout sets the maximum time in milliseconds to wait for the request.
+	Timeout int
+	// Retry enables automatic retries on failure (enabled by default).
+	Retry bool
+	// Session maintains a persistent browser session across requests.
+	Session string
+	// SessionStickyProxy keeps the same proxy for all requests in a session.
+	SessionStickyProxy bool
+	// Tags are custom tags for organizing and filtering requests.
+	Tags []string
+	// Webhook is the name of a webhook to call after the request completes.
+	Webhook string
+	// Debug enables debug mode for viewing request details in the dashboard.
+	Debug bool
+	// SSL enables SSL certificate verification details capture.
+	SSL bool
+	// DNS enables DNS resolution details capture.
+	DNS bool
+	// CorrelationID is a custom ID for tracking requests across systems.
+	CorrelationID string
+	// Format specifies the output format for the scraped content.
+	Format Format
+	// FormatOptions are additional options for the content format.
+	FormatOptions []FormatOption
+	// ExtractionTemplate is the name of a saved extraction template.
+	ExtractionTemplate string
+	// ExtractionEphemeralTemplate is an inline extraction template definition.
 	ExtractionEphemeralTemplate map[string]interface{}
-	ExtractionPrompt            string
-	ExtractionModel             string
-	WaitForSelector             string
-	RenderingWait               int
-	AutoScroll                  bool
-	Screenshots                 map[string]string
-	ScreenshotFlags             []ScreenshotFlag
-	JS                          string
-	JSScenario                  []js_scenario.JSScenarioStep
-	OS                          string
-	Lang                        []string
+	// ExtractionPrompt is an AI prompt for extracting structured data.
+	ExtractionPrompt string
+	// ExtractionModel specifies which AI model to use for extraction.
+	ExtractionModel string
+	// WaitForSelector waits for a CSS selector to appear before capturing (requires RenderJS).
+	WaitForSelector string
+	// RenderingWait is additional wait time in milliseconds after page load (requires RenderJS).
+	RenderingWait int
+	// AutoScroll automatically scrolls the page to load lazy content (requires RenderJS).
+	AutoScroll bool
+	// Screenshots is a map of screenshot names to CSS selectors (requires RenderJS).
+	Screenshots map[string]string
+	// ScreenshotFlags are options for screenshot capture.
+	ScreenshotFlags []ScreenshotFlag
+	// JS is custom JavaScript code to execute in the browser (requires RenderJS).
+	JS string
+	// JSScenario is a sequence of browser actions to perform (requires RenderJS).
+	JSScenario []js_scenario.JSScenarioStep
+	// OS spoofs the operating system in the User-Agent.
+	OS string
+	// Lang sets the Accept-Language header values.
+	Lang []string
 }
 
 // toAPIParams converts the ScrapeConfig into URL parameters for the Scrapfly API.
+// This is an internal method used by the Client to prepare API requests.
 func (c *ScrapeConfig) toAPIParams() (url.Values, error) {
 	params := url.Values{}
 
@@ -246,6 +319,8 @@ func (c *ScrapeConfig) toAPIParams() (url.Values, error) {
 }
 
 // processBody handles the Data and Body fields for POST/PUT/PATCH requests.
+// It converts the Data map to the appropriate body format based on Content-Type.
+// This is an internal method used during request preparation.
 func (c *ScrapeConfig) processBody() error {
 	method := strings.ToUpper(c.Method)
 	if method != "POST" && method != "PUT" && method != "PATCH" {

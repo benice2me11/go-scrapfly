@@ -1,3 +1,34 @@
+// Package scrapfly provides a Go SDK for the Scrapfly.io web scraping API.
+//
+// Scrapfly is a web scraping API that handles proxies, browser rendering,
+// anti-bot protection, and more. This SDK provides a simple interface to
+// interact with the Scrapfly API for scraping web pages, taking screenshots,
+// and extracting structured data.
+//
+// # Installation
+//
+//	go get github.com/scrapfly/go-scrapfly
+//
+// # Quick Start
+//
+//	client, err := scrapfly.New("YOUR_API_KEY")
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	config := &scrapfly.ScrapeConfig{
+//	    URL:      "https://example.com",
+//	    RenderJS: true,
+//	}
+//
+//	result, err := client.Scrape(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	fmt.Println(result.Result.Content)
+//
+// For more examples and documentation, visit https://scrapfly.io/docs
 package scrapfly
 
 import (
@@ -23,12 +54,23 @@ const (
 	sdkUserAgent   = "Scrapfly-Go-SDK"
 )
 
+// Client is the main client for interacting with the Scrapfly API.
+// It handles authentication, request execution, and response parsing.
 type Client struct {
 	key        string
 	host       string
 	httpClient *http.Client
 }
 
+// New creates a new Scrapfly client with the provided API key.
+// The API key can be obtained from https://scrapfly.io/dashboard.
+//
+// Example:
+//
+//	client, err := scrapfly.New("YOUR_API_KEY")
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
 func New(key string) (*Client, error) {
 	if key == "" {
 		return nil, ErrBadAPIKey
@@ -40,6 +82,17 @@ func New(key string) (*Client, error) {
 	}, nil
 }
 
+// NewWithHost creates a new Scrapfly client with a custom API host.
+// This is useful for enterprise deployments or testing against a custom endpoint.
+//
+// Parameters:
+//   - key: Your Scrapfly API key
+//   - host: Custom API host URL (e.g., "https://custom-api.example.com")
+//   - verifySSL: Whether to verify SSL certificates (set to false only for testing)
+//
+// Example:
+//
+//	client, err := scrapfly.NewWithHost("YOUR_API_KEY", "https://custom-api.example.com", true)
 func NewWithHost(key, host string, verifySSL bool) (*Client, error) {
 	if key == "" {
 		return nil, ErrBadAPIKey
@@ -54,14 +107,29 @@ func NewWithHost(key, host string, verifySSL bool) (*Client, error) {
 	}, nil
 }
 
+// APIKey returns the currently configured API key.
 func (c *Client) APIKey() string {
 	return c.key
 }
 
+// SetAPIKey updates the API key for the client.
+// This is useful for switching between different API keys at runtime.
 func (c *Client) SetAPIKey(key string) {
 	c.key = key
 }
 
+// VerifyAPIKey checks if the configured API key is valid.
+// Returns a VerifyAPIKeyResult indicating whether the key is valid.
+//
+// Example:
+//
+//	result, err := client.VerifyAPIKey()
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	if result.Valid {
+//	    fmt.Println("API key is valid")
+//	}
 func (c *Client) VerifyAPIKey() (*VerifyAPIKeyResult, error) {
 	endpointURL, _ := url.Parse(c.host + "/account")
 	params := url.Values{}
@@ -87,6 +155,30 @@ func (c *Client) VerifyAPIKey() (*VerifyAPIKeyResult, error) {
 	return &VerifyAPIKeyResult{Valid: false}, nil
 }
 
+// Scrape performs a web scraping request using the provided configuration.
+// This is the main method for scraping web pages with Scrapfly.
+//
+// The method supports various features including:
+//   - JavaScript rendering (RenderJS)
+//   - Proxy rotation and geo-targeting
+//   - Anti-bot protection (ASP)
+//   - Custom headers and cookies
+//   - Screenshot capture
+//   - Data extraction
+//
+// Example:
+//
+//	config := &scrapfly.ScrapeConfig{
+//	    URL:      "https://example.com",
+//	    RenderJS: true,
+//	    Country:  "us",
+//	    ASP:      true,
+//	}
+//	result, err := client.Scrape(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Println(result.Result.Content)
 func (c *Client) Scrape(config *ScrapeConfig) (*ScrapeResult, error) {
 	DefaultLogger.Debug("scraping", "url", config.URL)
 
@@ -145,6 +237,31 @@ func (c *Client) Scrape(config *ScrapeConfig) (*ScrapeResult, error) {
 	return nil, c.createErrorFromResult(&result)
 }
 
+// ConcurrentScrape performs multiple scraping requests concurrently with controlled concurrency.
+// This is useful for scraping multiple pages efficiently while respecting rate limits.
+//
+// Parameters:
+//   - configs: A slice of ScrapeConfig objects to scrape
+//   - concurrencyLimit: Maximum number of concurrent requests. If <= 0, uses account's concurrent limit
+//
+// Returns a channel that emits results as they complete. Each result contains either
+// a successful ScrapeResult or an error.
+//
+// Example:
+//
+//	configs := []*scrapfly.ScrapeConfig{
+//	    {URL: "https://example.com/page1"},
+//	    {URL: "https://example.com/page2"},
+//	    {URL: "https://example.com/page3"},
+//	}
+//	resultsChan := client.ConcurrentScrape(configs, 3)
+//	for result := range resultsChan {
+//	    if result.error != nil {
+//	        log.Printf("Error: %v", result.error)
+//	        continue
+//	    }
+//	    fmt.Println(result.ScrapeResult.Result.Content)
+//	}
 func (c *Client) ConcurrentScrape(configs []*ScrapeConfig, concurrencyLimit int) <-chan struct {
 	*ScrapeResult
 	error
@@ -198,6 +315,28 @@ func (c *Client) ConcurrentScrape(configs []*ScrapeConfig, concurrencyLimit int)
 	return resultsChan
 }
 
+// Screenshot captures a screenshot of a web page using the provided configuration.
+//
+// Supports various features including:
+//   - Multiple image formats (JPG, PNG, WEBP, GIF)
+//   - Full page or element-specific capture
+//   - Custom resolution
+//   - Dark mode
+//   - Banner blocking
+//
+// Example:
+//
+//	config := &scrapfly.ScreenshotConfig{
+//	    URL:        "https://example.com",
+//	    Format:     scrapfly.FormatPNG,
+//	    Capture:    "fullpage",
+//	    Resolution: "1920x1080",
+//	}
+//	result, err := client.Screenshot(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	// result.Image contains the screenshot bytes
 func (c *Client) Screenshot(config *ScreenshotConfig) (*ScreenshotResult, error) {
 	params, err := config.toAPIParams()
 	if err != nil {
@@ -231,6 +370,26 @@ func (c *Client) Screenshot(config *ScreenshotConfig) (*ScreenshotResult, error)
 	return newScreenshotResult(resp, bodyBytes)
 }
 
+// SaveScreenshot saves a screenshot result to disk.
+//
+// Parameters:
+//   - result: The ScreenshotResult obtained from Screenshot()
+//   - name: The base name for the file (without extension)
+//   - savePath: Optional directory path where to save the file (defaults to current directory)
+//
+// Returns the full path to the saved file.
+//
+// Example:
+//
+//	result, err := client.Screenshot(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	filePath, err := client.SaveScreenshot(result, "example", "./screenshots")
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Printf("Screenshot saved to: %s\n", filePath)
 func (c *Client) SaveScreenshot(result *ScreenshotResult, name string, savePath ...string) (string, error) {
 	if len(result.Image) == 0 {
 		return "", fmt.Errorf("screenshot image is empty")
@@ -247,6 +406,23 @@ func (c *Client) SaveScreenshot(result *ScreenshotResult, name string, savePath 
 	return filePath, err
 }
 
+// Extract performs AI-powered structured data extraction from HTML content.
+//
+// This method uses Scrapfly's AI extraction capabilities to parse HTML and
+// extract structured data based on templates or prompts.
+//
+// Example:
+//
+//	config := &scrapfly.ExtractionConfig{
+//	    Body:               []byte("<html>...</html>"),
+//	    ContentType:        "text/html",
+//	    ExtractionTemplate: "product",
+//	}
+//	result, err := client.Extract(config)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Printf("Extracted data: %+v\n", result.Data)
 func (c *Client) Extract(config *ExtractionConfig) (*ExtractionResult, error) {
 	params, err := config.toAPIParams()
 	if err != nil {
@@ -292,6 +468,22 @@ func (c *Client) Extract(config *ExtractionConfig) (*ExtractionResult, error) {
 	return &result, nil
 }
 
+// Account retrieves information about the current Scrapfly account.
+//
+// Returns account details including:
+//   - Subscription plan and limits
+//   - API usage statistics
+//   - Billing information
+//   - Concurrency limits
+//
+// Example:
+//
+//	account, err := client.Account()
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	fmt.Printf("Plan: %s\n", account.Subscription.PlanName)
+//	fmt.Printf("Remaining requests: %d\n", account.Subscription.Usage.Scrape.Remaining)
 func (c *Client) Account() (*AccountData, error) {
 	endpointURL, _ := url.Parse(c.host + "/account")
 	params := url.Values{}

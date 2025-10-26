@@ -10,8 +10,17 @@ import (
 	js_scenario "github.com/scrapfly/go-scrapfly/scenario"
 )
 
+func getApiKey() string {
+	apiKey := os.Getenv("SCRAPFLY_API_KEY")
+	if apiKey == "" {
+		log.Fatalf("SCRAPFLY_API_KEY environment variable is not set")
+	}
+	return apiKey
+}
+
 // getAccount demonstrates fetching account information
-func Example_GetAccount(apiKey string) {
+func Example_getAccount() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -25,10 +34,80 @@ func Example_GetAccount(apiKey string) {
 	fmt.Println("Account:")
 	accountJSON, _ := json.MarshalIndent(account, "", "  ")
 	fmt.Println(string(accountJSON))
+	// Output: Account:
+	// {
+	// 	"account": {
+	// 	  "account_id": "XX-XXX-4c01-a9X97-XXXX",
+	// 	  "currency": "USD",
+	// 	  "timezone": "Europe/Paris",
+	// 	  "suspended": false,
+	// 	  "suspension_reason": ""
+	// 	},
+	// 	"project": {
+	// 	  "allow_extra_usage": true,
+	// 	  "allowed_networks": [],
+	// 	  "budget_limit": null,
+	// 	  "budget_spent": null,
+	// 	  "concurrency_limit": null,
+	// 	  "name": "default",
+	// 	  "quota_reached": false,
+	// 	  "scrape_request_count": 307,
+	// 	  "scrape_request_limit": null,
+	// 	  "tags": []
+	// 	},
+	// 	"subscription": {
+	// 	  "billing": {
+	// 		"current_extra_scrape_request_price": {
+	// 		  "currency": "USD",
+	// 		  "amount": 0
+	// 		},
+	// 		"extra_scrape_request_price_per_10k": {
+	// 		  "currency": "USD",
+	// 		  "amount": 0
+	// 		},
+	// 		"ongoing_payment": {
+	// 		  "currency": "USD",
+	// 		  "amount": 0
+	// 		},
+	// 		"plan_price": {
+	// 		  "currency": "USD",
+	// 		  "amount": 0
+	// 		}
+	// 	  },
+	// 	  "extra_scrape_allowed": false,
+	// 	  "max_concurrency": 5,
+	// 	  "period": {
+	// 		"start": "2025-08-01 00:06:34",
+	// 		"end": "2025-09-01 00:06:34"
+	// 	  },
+	// 	  "plan_name": "FREE",
+	// 	  "usage": {
+	// 		"spider": {
+	// 		  "current": 0,
+	// 		  "limit": 1
+	// 		},
+	// 		"schedule": {
+	// 		  "current": 0,
+	// 		  "limit": 1
+	// 		},
+	// 		"scrape": {
+	// 		  "concurrent_limit": 5,
+	// 		  "concurrent_remaining": 5,
+	// 		  "concurrent_usage": 0,
+	// 		  "current": 307,
+	// 		  "extra": 0,
+	// 		  "limit": 1000,
+	// 		  "remaining": 693
+	// 		}
+	// 	  }
+	// 	}
+	//   }
+
 }
 
 // basicGet demonstrates basic scraping with cache and ASP
-func basicGet(apiKey string) {
+func Example_basicGet() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -61,10 +140,171 @@ func basicGet(apiKey string) {
 	fmt.Println("\nresponse cookies:")
 	cookiesJSON, _ := json.MarshalIndent(scrapeResult.Result.Cookies, "", "  ")
 	fmt.Println(string(cookiesJSON))
+	// Output: scrapfly: 2025/10/26 05:39:16 [DEBUG] scraping url https://httpbin.dev/html
+	// scrapfly: 2025/10/26 05:39:19 [DEBUG] scrape log url: https://scrapfly.io/dashboard/monitoring/log/01K8FGECZ0FDFSQ3W11V0M1MMG
+	// web log url:
+	// https://scrapfly.io/dashboard/monitoring/log/01K8FGECZ0FDFSQ3W11V0M1MMG
+	// page content:
+	// <!DOCTYPE html>
+	// <html>
+	// <head>
+	// </head>
+	// <body>
+	//     <h1>Herman Melville - Moby-Dick</h1>
+	//     <div>
+	//         <p>
+	//             Availing himself of the mild, summer-cool weather that now reigned in these latitudes, and in preparation
+	//             for the peculiarly active pursuits shortly to be anticipated, Perth, the begrimed, blistered old blacksmith,
+	//             had not removed his portable forge to the hold again, after concluding his contributory work for Ahab's leg,
+	//             but still retained it on deck, fast lashed to ringbolts by the foremast; being now almost incessantly
+	//             invoked by the headsmen, and harpooneers, and bowsmen to do some little job for them; altering, or
+	//             repairing, or new shaping their various weapons and boat furniture. Often he would be surrounded by an eager
+	//             circle, all waiting to be served; holding boat-spades, pike-heads, harpoons, and lances, and jealously
+	//             watching his every sooty movement, as he toiled. Nevertheless, this old man's was a patient hammer wielded
+	//             by a patient arm. No murmur, no impatience, no petulance did come from him. Silent, slow, and solemn; bowing
+	//             over still further his chronically broken back, he toiled away, as if toil were life itself, and the heavy
+	//             beating of his hammer the heavy beating of his heart. And so it was.—Most miserable! A peculiar walk in this
+	//             old man, a certain slight but painful appearing yawing in his gait, had at an early period of the voyage
+	//             excited the curiosity of the mariners. And to the importunity of their persisted questionings he had finally
+	//             given in; and so it came to pass that every one now knew the shameful story of his wretched fate. Belated,
+	//             and not innocently, one bitter winter's midnight, on the road running between two country towns, the
+	//             blacksmith half-stupidly felt the deadly numbness stealing over him, and sought refuge in a leaning,
+	//             dilapidated barn. The issue was, the loss of the extremities of both feet. Out of this revelation, part by
+	//             part, at last came out the four acts of the gladness, and the one long, and as yet uncatastrophied fifth act
+	//             of the grief of his life's drama. He was an old man, who, at the age of nearly sixty, had postponedly
+	//             encountered that thing in sorrow's technicals called ruin. He had been an artisan of famed excellence, and
+	//             with plenty to do; owned a house and garden; embraced a youthful, daughter-like, loving wife, and three
+	//             blithe, ruddy children; every Sunday went to a cheerful-looking church, planted in a grove. But one night,
+	//             under cover of darkness, and further concealed in a most cunning disguisement, a desperate burglar slid into
+	//             his happy home, and robbed them all of everything. And darker yet to tell, the blacksmith himself did
+	//             ignorantly conduct this burglar into his family's heart. It was the Bottle Conjuror! Upon the opening of
+	//             that fatal cork, forth flew the fiend, and shrivelled up his home. Now, for prudent, most wise, and economic
+	//             reasons, the blacksmith's shop was in the basement of his dwelling, but with a separate entrance to it; so
+	//             that always had the young and loving healthy wife listened with no unhappy nervousness, but with vigorous
+	//             pleasure, to the stout ringing of her young-armed old husband's hammer; whose reverberations, muffled by
+	//             passing through the floors and walls, came up to her, not unsweetly, in her nursery; and so, to stout
+	//             Labor's iron lullaby, the blacksmith's infants were rocked to slumber. Oh, woe on woe! Oh, Death, why canst
+	//             thou not sometimes be timely? Hadst thou taken this old blacksmith to thyself ere his full ruin came upon
+	//             him, then had the young widow had a delicious grief, and her orphans a truly venerable, legendary sire to
+	//             dream of in their after years; and all of them a care-killing competency.
+	//         </p>
+	//     </div>
+	//     <hr>
+	//     <h2>Heading Level 2</h2>
+	//     <h3>Heading Level 3</h3>
+	//     <p>This is a paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+	//     <blockquote>
+	//         <p>This is a blockquote for markdown testing.</p>
+	//     </blockquote>
+	//     <pre><code>// This is a code block
+	// function test() {
+	//   return true;
+	// }
+	// </code></pre>
+	//     <ul>
+	//         <li>Unordered list item 1
+	//             <ul>
+	//                 <li>Nested unordered item A</li>
+	//                 <li>Nested unordered item B</li>
+	//             </ul>
+	//         </li>
+	//         <li>Unordered list item 2</li>
+	//     </ul>
+	//     <ol>
+	//         <li>Ordered list item 1
+	//             <ol>
+	//                 <li>Nested ordered item A</li>
+	//                 <li>Nested ordered item B</li>
+	//             </ol>
+	//         </li>
+	//         <li>Ordered list item 2</li>
+	//     </ol>
+	//     <p>Link: <a href="https://httpbin.dev">httpbin.dev</a></p>
+	//     <p>Image: <img src="https://httpbin.dev/image/png" alt="Test Image" width="100"></p>
+	//     <h3>Vertical Table</h3>
+	//     <table>
+	//         <tr>
+	//             <th>Header 1</th>
+	//             <th>Header 2</th>
+	//         </tr>
+	//         <tr>
+	//             <td>Cell 1</td>
+	//             <td>Cell 2</td>
+	//         </tr>xwx
+	//         <tr>
+	//             <td>Cell 3</td>
+	//             <td>Cell 4</td>
+	//         </tr>
+	//     </table>
+	//     <h3>Horizontal Table</h3>
+	//     <table border="1">
+	//         <tr>
+	//             <th>Name</th>
+	//             <th>Age</th>
+	//             <th>Country</th>
+	//         </tr>
+	//         <tr>
+	//             <td>Alice</td>
+	//             <td>30</td>
+	//             <td>USA</td>
+	//         </tr>
+	//         <tr>
+	//             <td>Bob</td>
+	//             <td>25</td>
+	//             <td>UK</td>
+	//         </tr>
+	//         <tr>
+	//             <td>Charlie</td>
+	//             <td>35</td>
+	//             <td>Canada</td>
+	//         </tr>
+	//     </table>
+	//     <h3>Vertical Table</h3>
+	//     <table border="1">
+	//         <tr>
+	//             <th>Field</th>
+	//             <th>Value</th>
+	//         </tr>
+	//         <tr>
+	//             <td>Name</td>
+	//             <td>Alice</td>
+	//         </tr>
+	//         <tr>
+	//             <td>Age</td>
+	//             <td>30</td>
+	//         </tr>
+	//         <tr>
+	//             <td>Country</td>
+	//             <td>USA</td>
+	//         </tr>
+	//     </table>
+	// </body>
+	//
+	// </html>
+	//
+	// response headers:
+	// {
+	//   "access-control-allow-credentials": "true",
+	//   "access-control-allow-origin": "*",
+	//   "alt-svc": "h3=\":443\"; ma=2592000",
+	//   "content-security-policy": "frame-ancestors 'self' *.httpbin.dev; font-src 'self' *.httpbin.dev; default-src 'self' *.httpbin.dev; img-src 'self' *.httpbin.dev https://cdn.scrapfly.io; media-src 'self' *.httpbin.dev; object-src 'self' *.httpbin.dev https://web-scraping.dev; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.httpbin.dev; style-src 'self' 'unsafe-inline' *.httpbin.dev https://unpkg.com; frame-src 'self' *.httpbin.dev https://web-scraping.dev; worker-src 'self' *.httpbin.dev; connect-src 'self' *.httpbin.dev",
+	//   "content-type": "text/html; charset=utf-8",
+	//   "date": "Sun, 26 Oct 2025 05:39:19 GMT",
+	//   "permissions-policy": "fullscreen=(self), autoplay=*, geolocation=(), camera=()",
+	//   "referrer-policy": "strict-origin-when-cross-origin",
+	//   "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+	//   "x-content-type-options": "nosniff",
+	//   "x-xss-protection": "1; mode=block"
+	// }
+	//
+	// response cookies:
+	// []
+
 }
 
 // jsRender demonstrates JavaScript rendering with scenarios
-func jsRender(apiKey string) {
+func Example_jsRender() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -112,10 +352,104 @@ func jsRender(apiKey string) {
 	fmt.Println("\nbrowser data capture:")
 	browserDataJSON, _ := json.MarshalIndent(scrapeResult.Result.BrowserData, "", "  ")
 	fmt.Println(string(browserDataJSON))
+	// Output: scrapfly: 2025/10/26 05:39:19 [DEBUG] scraping url https://web-scraping.dev/product/1
+	// scrapfly: 2025/10/26 05:39:34 [DEBUG] scrape log url: https://scrapfly.io/dashboard/monitoring/log/01K8FGEG1NB3RJ183CJ27YD25N
+	// web log url:
+	// https://scrapfly.io/dashboard/monitoring/log/01K8FGEG1NB3RJ183CJ27YD25N
+	//
+	// page content (first 1000 chars):
+	// <html lang="en"><head>
+	//     <meta charset="utf-8">
+	//     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	//     <link rel="stylesheet" href="https://web-scraping.dev/assets/css/main.css">
+	//     <link rel="stylesheet" href="https://web-scraping.dev/assets/css/bootstrap.min.css">
+	//     <link rel="stylesheet" href="https://web-scraping.dev/assets/css/bootstrap-icons.css">
+	//     <link rel="stylesheet" href="https://web-scraping.dev/assets/css/highlight-nord.css">
+	//     <link rel="icon" href="https://web-scraping.dev/assets/media/icon.png" type="image/png">
+	//     <script src="https://web-scraping.dev/assets/js/cash.min.js"></script>
+	//     <script src="https://web-scraping.dev/assets/js/main.js"></script>
+	//     <script src="https://web-scraping.dev/assets/js/bootstrap.js"></script>
+	// <title>web-scraping.dev product Box of Chocolate Candy</title>
+	// <meta name="description" content="Mock product Box of Chocolate Candy page for web scraper testing">
+	// <meta property="og:sit...
+	// browser data capture:
+	//
+	//	{
+	//	  "javascript_evaluation_result": "2022-07-22     \n\nAbsolutely delicious! The orange flavor is my favorite.",
+	//	  "js_scenario": {
+	//	    "duration": 3.0700000000000003,
+	//	    "executed": 2,
+	//	    "response": null,
+	//	    "steps": [
+	//	      {
+	//	        "action": "click",
+	//	        "config": {
+	//	          "ignore_if_not_visible": false,
+	//	          "multiple": false,
+	//	          "selector": "#load-more-reviews",
+	//	          "timeout": 3500
+	//	        },
+	//	        "duration": 1.07,
+	//	        "executed": true,
+	//	        "result": null,
+	//	        "success": true
+	//	      },
+	//	      {
+	//	        "action": "wait",
+	//	        "config": 2000,
+	//	        "duration": 2,
+	//	        "executed": true,
+	//	        "result": null,
+	//	        "success": true
+	//	      }
+	//	    ]
+	//	  },
+	//	  "local_storage_data": {},
+	//	  "session_storage_data": {},
+	//	  "websockets": [],
+	//	  "xhr_call": [
+	//	    {
+	//	      "body": null,
+	//	      "headers": {
+	//	        "Accept": "* /*",
+	//	        "Referer": "https://web-scraping.dev/product/1",
+	//	        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+	//	        "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+	//	        "sec-ch-ua-mobile": "?0",
+	//	        "sec-ch-ua-platform": "\"macOS\"",
+	//	        "x-csrf-token": "secret-csrf-token-123"
+	//	      },
+	//	      "method": "GET",
+	//	      "response": {
+	//	        "body": "{\"order\":\"asc\",\"category\":null,\"total_results\":10,\"next_url\":null,\"results\":[{\"id\":\"chocolate-candy-box-6\",\"text\":\"Bought the large box, and it's lasted quite a while. Great for when you need a sweet treat.\",\"rating\":5,\"date\":\"2022-12-18\"},{\"id\":\"chocolate-candy-box-7\",\"text\":\"These chocolates are so tasty! Love the variety of flavors.\",\"rating\":5,\"date\":\"2023-01-24\"},{\"id\":\"chocolate-candy-box-8\",\"text\":\"The box is nicely packaged, making it a great gift option.\",\"rating\":5,\"date\":\"2023-02-15\"},{\"id\":\"chocolate-candy-box-9\",\"text\":\"The orange flavor wasn't my favorite, but the cherry ones are great.\",\"rating\":4,\"date\":\"2023-03-20\"},{\"id\":\"chocolate-candy-box-10\",\"text\":\"Delicious chocolates, and the box is pretty substantial. It'd make a nice gift.\",\"rating\":5,\"date\":\"2023-04-18\"}],\"page_number\":2,\"page_size\":5,\"page_total\":2}",
+	//	        "content_encoding": null,
+	//	        "content_type": "application/json",
+	//	        "duration": 0,
+	//	        "format": "text",
+	//	        "headers": {
+	//	          "alt-svc": "h3=\":443\"; ma=2592000",
+	//	          "content-length": "839",
+	//	          "content-type": "application/json",
+	//	          "date": "Sun, 26 Oct 2025 05:39:31 GMT",
+	//	          "permissions-policy": "fullscreen=(self), autoplay=*, geolocation=(), camera=()",
+	//	          "referrer-policy": "strict-origin-when-cross-origin",
+	//	          "server": "uvicorn",
+	//	          "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+	//	          "x-content-type-options": "nosniff",
+	//	          "x-xss-protection": "1; mode=block"
+	//	        },
+	//	        "status": 200
+	//	      },
+	//	      "type": "fetch",
+	//	      "url": "https://web-scraping.dev/api/reviews?product_id=1\u0026page=2"
+	//	    }
+	//	  ]
+	//	}
 }
 
 // scrapeExtraction demonstrates scraping with inline extraction using LLM prompts
-func scrapeExtraction(apiKey string) {
+func Example_scrapeExtraction() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -139,7 +473,8 @@ func scrapeExtraction(apiKey string) {
 }
 
 // extractionLLM demonstrates using the extraction API with LLM prompts
-func extractionLLM(apiKey string) {
+func Example_extractionLLM() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -184,10 +519,30 @@ func extractionLLM(apiKey string) {
 	fmt.Println("\nllm extraction in JSON:")
 	llmFormatResultJSON, _ := json.MarshalIndent(llmFormatResult, "", "  ")
 	fmt.Println(string(llmFormatResultJSON))
+	// Output: scrapfly: 2025/10/26 05:40:07 [DEBUG] scraping url https://web-scraping.dev/product/1
+	// scrapfly: 2025/10/26 05:40:10 [DEBUG] scrape log url: https://scrapfly.io/dashboard/monitoring/log/01K8FGFYM4NC6TYYBT805BSH30
+	// llm extraction:
+	// {
+	//   "data": "The price of the \"Box of Chocolate Candy\" is $9.99, with a previous price of $12.99.",
+	//   "content_type": "text/plain"
+	// }
+	//
+	// llm extraction in JSON:
+	//
+	//	{
+	//	  "data": {
+	//	    "currency": "USD",
+	//	    "original_price": 12.99,
+	//	    "price": 9.99,
+	//	    "product": "Box of Chocolate Candy"
+	//	  },
+	//	  "content_type": "application/json"
+	//	}
 }
 
 // extractionAutoExtract demonstrates automatic extraction using predefined models
-func extractionAutoExtract(apiKey string) {
+func Example_extractionAutoExtract() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -221,7 +576,8 @@ func extractionAutoExtract(apiKey string) {
 }
 
 // extractionTemplates demonstrates using extraction templates
-func extractionTemplates(apiKey string) {
+func Example_extractionTemplates() {
+	apiKey := getApiKey()
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -272,10 +628,42 @@ func extractionTemplates(apiKey string) {
 	fmt.Println("template extract:")
 	templateResultJSON, _ := json.MarshalIndent(templateResult, "", "  ")
 	fmt.Println(string(templateResultJSON))
+	// Output: scrapfly: 2025/10/26 05:40:28 [DEBUG] scraping url https://web-scraping.dev/reviews
+	// scrapfly: 2025/10/26 05:40:35 [DEBUG] scrape log url: https://scrapfly.io/dashboard/monitoring/log/01K8FGGJX0AY63MHW2ACEY4ZFZ
+	// template extract:
+	// {
+	//   "data": {
+	//     "date_posted": [
+	//       "2023, May 18 — Thursday",
+	//       "2023, May 17 — Wednesday",
+	//       "2023, May 16 — Tuesday",
+	//       "2023, May 15 — Monday",
+	//       "2023, May 15 — Monday",
+	//       "2023, May 12 — Friday",
+	//       "2023, May 10 — Wednesday",
+	//       "2023, May 01 — Monday",
+	//       "2023, May 01 — Monday",
+	//       "2023, Apr 25 — Tuesday",
+	//       "2023, Apr 25 — Tuesday",
+	//       "2023, Apr 18 — Tuesday",
+	//       "2023, Apr 12 — Wednesday",
+	//       "2023, Apr 11 — Tuesday",
+	//       "2023, Apr 10 — Monday",
+	//       "2023, Apr 10 — Monday",
+	//       "2023, Apr 09 — Sunday",
+	//       "2023, Apr 07 — Friday",
+	//       "2023, Apr 07 — Friday",
+	//       "2023, Apr 05 — Wednesday"
+	//     ]
+	//   },
+	//   "content_type": "application/json"
+	// }
 }
 
 // screenshot demonstrates capturing screenshots
-func screenshot(apiKey string) {
+func ExampleScreenshot() {
+	apiKey := getApiKey()
+
 	client, err := scrapfly.New(apiKey)
 	if err != nil {
 		log.Fatalf("failed to create client: %v", err)
@@ -308,46 +696,7 @@ func screenshot(apiKey string) {
 		log.Fatalf("failed to save screenshot: %v", err)
 	}
 	fmt.Printf("saved screenshot to %s\n", filePath)
-}
-
-func main() {
-	// You can enable debug logs to see more details
-	scrapfly.DefaultLogger.SetLevel(scrapfly.LevelDebug)
-
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run main.go <functionName> <apiKey>")
-		fmt.Println("Available functions:")
-		fmt.Println("  getAccount            - Get account information")
-		fmt.Println("  basicGet              - Basic scrape")
-		fmt.Println("  jsRender              - Scrape with JS rendering")
-		fmt.Println("  scrapeExtraction      - Scrape with inline extraction")
-		fmt.Println("  extractionLLM         - Extract content using LLM queries")
-		fmt.Println("  extractionAutoExtract - Extract common web objects using Auto Extract")
-		fmt.Println("  extractionTemplates   - Extract content using Template engine")
-		fmt.Println("  screenshot            - Capture screenshots using Screenshot API")
-		return
-	}
-
-	functionName := os.Args[1]
-	apiKey := os.Args[2]
-
-	// Map function names to functions
-	functions := map[string]func(string){
-		"getAccount":            getAccount,
-		"basicGet":              basicGet,
-		"jsRender":              jsRender,
-		"scrapeExtraction":      scrapeExtraction,
-		"extractionLLM":         extractionLLM,
-		"extractionAutoExtract": extractionAutoExtract,
-		"extractionTemplates":   extractionTemplates,
-		"screenshot":            screenshot,
-	}
-
-	fn, exists := functions[functionName]
-	if !exists {
-		log.Fatalf("Function %s not found", functionName)
-	}
-
-	// Execute the function
-	fn(apiKey)
+	// Output: captured screenshot:
+	// Format: jpeg, Size: 586399 bytes
+	// saved screenshot to screenshot.jpeg
 }

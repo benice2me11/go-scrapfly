@@ -8,5 +8,6 @@ require github.com/PuerkitoBio/goquery v1.10.3
 
 require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
+	github.com/google/jsonschema-go v0.3.0
 	golang.org/x/net v0.46.0 // indirect
 )

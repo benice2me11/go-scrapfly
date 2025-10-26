@@ -70,19 +70,5 @@ func main() {
 }
 ```
 
-## Debugging
-
-To enable debug logs, you can set the logger level:
-
-```go
-scrapefly.Logger.SetLevel(scrapefly.LevelDebug)
-```
-
-Additionally, set `Debug: true` in `ScrapeConfig` to access debug information in the [Scrapfly web dashboard](https://scrapfly.io/dashboard):
-
-```go
-scrapeConfig := &scrapefly.ScrapeConfig{
-    URL:   "https://web-scraping.dev/product/1",
-    Debug: true, // Enable debug information for the web dashboard
-}
-```
+## Full Documentation
+* Please refer to the [Scrapfly API documentation](https://scrapfly.io/docs) for full documentation and examples.

@@ -2,8 +2,6 @@ package scrapfly
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -68,45 +66,6 @@ func (r *ScrapeResult) Selector() (*goquery.Document, error) {
 
 	r.selector = doc
 	return r.selector, nil
-}
-
-// ScreenshotResult represents a screenshot captured by the API.
-type ScreenshotResult struct {
-	// Image contains the raw screenshot image bytes.
-	Image []byte
-	// Metadata contains information about the screenshot.
-	Metadata ScreenshotMetadata
-}
-
-// ScreenshotMetadata contains metadata about a captured screenshot.
-type ScreenshotMetadata struct {
-	// ExtensionName is the file extension (jpg, png, webp, gif).
-	ExtensionName string
-	// UpstreamStatusCode is the HTTP status code from the target website.
-	UpstreamStatusCode int
-	// UpstreamURL is the final URL after any redirects.
-	UpstreamURL string
-}
-
-// newScreenshotResult creates a ScreenshotResult from an HTTP response.
-func newScreenshotResult(resp *http.Response, data []byte) (*ScreenshotResult, error) {
-	contentType := resp.Header.Get("Content-Type")
-	ext := "bin"
-	if parts := strings.Split(contentType, "/"); len(parts) == 2 {
-		ext = strings.Split(parts[1], ";")[0]
-	}
-
-	statusCodeStr := resp.Header.Get("x-scrapfly-upstream-http-code")
-	statusCode, _ := strconv.Atoi(statusCodeStr)
-
-	return &ScreenshotResult{
-		Image: data,
-		Metadata: ScreenshotMetadata{
-			ExtensionName:      ext,
-			UpstreamStatusCode: statusCode,
-			UpstreamURL:        resp.Header.Get("x-scrapfly-upstream-url"),
-		},
-	}, nil
 }
 
 // ExtractionResult represents the result of a data extraction request.
@@ -225,7 +184,7 @@ type ResultData struct {
 	StatusCode      int                    `json:"status_code"`
 	Success         bool                   `json:"success"`
 	URL             string                 `json:"url"`
-	ExtractedData   interface{}            `json:"extracted_data"`
+	ExtractedData   *ExtractionResult      `json:"extracted_data"`
 }
 
 // --- Nested Structures for Context and Result ---
@@ -332,74 +291,4 @@ type Screenshot struct {
 	Format      string  `json:"format"`
 	Size        int     `json:"size"`
 	URL         string  `json:"url"`
-}
-
-// AccountData represents detailed account information from Scrapfly.
-//
-// This includes subscription details, usage statistics, billing information,
-// and account limits.
-type AccountData struct {
-	Account struct {
-		AccountID string `json:"account_id"`
-		Currency  string `json:"currency"`
-		Timezone  string `json:"timezone"`
-	} `json:"account"`
-	Project struct {
-		AllowExtraUsage    bool        `json:"allow_extra_usage"`
-		AllowedNetworks    []string    `json:"allowed_networks"`
-		BudgetLimit        interface{} `json:"budget_limit"`
-		BudgetSpent        interface{} `json:"budget_spent"`
-		ConcurrencyLimit   int         `json:"concurrency_limit"`
-		Name               string      `json:"name"`
-		QuotaReached       bool        `json:"quota_reached"`
-		ScrapeRequestCount int         `json:"scrape_request_count"`
-		ScrapeRequestLimit int         `json:"scrape_request_limit"`
-		Tags               []string    `json:"tags"`
-	} `json:"project"`
-	Subscription struct {
-		Billing struct {
-			CurrentExtraScrapeRequestPrice struct {
-				Currency string  `json:"currency"`
-				Amount   float64 `json:"amount"`
-			} `json:"current_extra_scrape_request_price"`
-			ExtraScrapeRequestPricePer10k struct {
-				Currency string  `json:"currency"`
-				Amount   float64 `json:"amount"`
-			} `json:"extra_scrape_request_price_per_10k"`
-			OngoingPayment struct {
-				Currency string  `json:"currency"`
-				Amount   float64 `json:"amount"`
-			} `json:"ongoing_payment"`
-			PlanPrice struct {
-				Currency string  `json:"currency"`
-				Amount   float64 `json:"amount"`
-			} `json:"plan_price"`
-		} `json:"billing"`
-		ExtraScrapeAllowed bool `json:"extra_scrape_allowed"`
-		MaxConcurrency     int  `json:"max_concurrency"`
-		Period             struct {
-			Start string `json:"start"`
-			End   string `json:"end"`
-		} `json:"period"`
-		PlanName string `json:"plan_name"`
-		Usage    struct {
-			Schedule struct {
-				Current int `json:"current"`
-				Limit   int `json:"limit"`
-			} `json:"schedule"`
-			Spider struct {
-				Current int `json:"current"`
-				Limit   int `json:"limit"`
-			} `json:"spider"`
-			Scrape struct {
-				ConcurrentLimit     int `json:"concurrent_limit"`
-				ConcurrentRemaining int `json:"concurrent_remaining"`
-				ConcurrentUsage     int `json:"concurrent_usage"`
-				Current             int `json:"current"`
-				Extra               int `json:"extra"`
-				Limit               int `json:"limit"`
-				Remaining           int `json:"remaining"`
-			} `json:"scrape"`
-		} `json:"usage"`
-	} `json:"subscription"`
 }

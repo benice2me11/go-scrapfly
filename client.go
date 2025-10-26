@@ -1,34 +1,3 @@
-// Package scrapfly provides a Go SDK for the Scrapfly.io web scraping API.
-//
-// Scrapfly is a web scraping API that handles proxies, browser rendering,
-// anti-bot protection, and more. This SDK provides a simple interface to
-// interact with the Scrapfly API for scraping web pages, taking screenshots,
-// and extracting structured data.
-//
-// # Installation
-//
-//	go get github.com/scrapfly/go-scrapfly
-//
-// # Quick Start
-//
-//	client, err := scrapfly.New("YOUR_API_KEY")
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//
-//	config := &scrapfly.ScrapeConfig{
-//	    URL:      "https://example.com",
-//	    RenderJS: true,
-//	}
-//
-//	result, err := client.Scrape(config)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
-//
-//	fmt.Println(result.Result.Content)
-//
-// For more examples and documentation, visit https://scrapfly.io/docs
 package scrapfly
 
 import (

@@ -29,6 +29,9 @@ func (f ProxyPool) String() string {
 	return "invalid_proxy_pool"
 }
 
+func (f ProxyPool) AnyEnum() []any {
+	return []any{PublicDataCenterPool, PublicResidentialPool}
+}
 func (f *ProxyPool) IsValid() bool {
 	return IsValidEnumType(f)
 }
@@ -52,6 +55,9 @@ const (
 
 func (f ScreenshotFlag) Enum() []ScreenshotFlag {
 	return []ScreenshotFlag{LoadImages, DarkMode, BlockBanners, PrintMediaFormat, HighQuality}
+}
+func (f ScreenshotFlag) AnyEnum() []any {
+	return []any{LoadImages, DarkMode, BlockBanners, PrintMediaFormat, HighQuality}
 }
 func (f ScreenshotFlag) String() string {
 	if slices.Contains(f.Enum(), f) {
@@ -85,6 +91,10 @@ func (f Format) Enum() []Format {
 	return []Format{FormatJSON, FormatText, FormatMarkdown, FormatCleanHTML, FormatRaw}
 }
 
+func (f Format) AnyEnum() []any {
+	return []any{FormatJSON, FormatText, FormatMarkdown, FormatCleanHTML, FormatRaw}
+}
+
 func (f Format) String() string {
 	if slices.Contains(f.Enum(), f) {
 		return string(f)
@@ -111,6 +121,9 @@ const (
 
 func (f FormatOption) Enum() []FormatOption {
 	return []FormatOption{NoLinks, NoImages, OnlyContent}
+}
+func (f FormatOption) AnyEnum() []any {
+	return []any{NoLinks, NoImages, OnlyContent}
 }
 func (f FormatOption) String() string {
 	if slices.Contains(f.Enum(), f) {
@@ -141,6 +154,9 @@ func (f HttpMethod) Enum() []HttpMethod {
 	return []HttpMethod{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodPatch, HttpMethodOptions}
 }
 
+func (f HttpMethod) AnyEnum() []any {
+	return []any{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodPatch, HttpMethodOptions}
+}
 func (f HttpMethod) String() string {
 	if slices.Contains(f.Enum(), f) {
 		return string(f)
@@ -152,15 +168,21 @@ func (f HttpMethod) IsValid() bool {
 	return IsValidEnumType(f)
 }
 
-type Enumerable interface {
-	Enum() []Enumerable
+type Enumerable[T fmt.Stringer] interface {
+	Enum() []T
+	AnyEnum() []any
 }
 
 func IsValidEnumType[T fmt.Stringer](f T) bool {
 	return !strings.HasPrefix(f.String(), "invalid")
 }
 
-func GetEnumFor[T Enumerable]() []Enumerable {
-	var v T
+func GetEnumFor[V Enumerable[T], T fmt.Stringer]() []T {
+	var v V
 	return v.Enum()
+}
+
+func GetAnyEnumFor[V Enumerable[T], T fmt.Stringer]() []any {
+	var v V
+	return v.AnyEnum()
 }

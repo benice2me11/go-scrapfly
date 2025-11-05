@@ -201,9 +201,69 @@ func (c *Client) Scrape(config *ScrapeConfig) (*ScrapeResult, error) {
 	}
 	if result.Result.Success && result.Result.Status == "DONE" {
 		DefaultLogger.Debug("scrape log url:", result.Result.LogURL)
+
+		contentFormat := result.Result.Format
+		if contentFormat == "clob" || contentFormat == "blob" {
+			newContent, newFormat, err := c.handleLargeObjects(result.Result.Content, contentFormat)
+			if err != nil {
+				return nil, fmt.Errorf("failed to fetch large object: %w", err)
+			}
+			result.Result.Content = newContent
+			result.Result.Format = newFormat
+		}
+
 		return &result, nil
 	}
 	return nil, c.createErrorFromResult(&result)
+}
+
+// handleLargeObjects fetches content for large objects (clob/blob formats) using the internal API key.
+func (c *Client) handleLargeObjects(contentURL string, format string) (string, string, error) {
+	parsedURL, err := url.Parse(contentURL)
+	if err != nil {
+		DefaultLogger.Error("failed to parse content URL:", err)
+		return "", "", err
+	}
+	params := parsedURL.Query()
+	params.Set("key", c.APIKey())
+	parsedURL.RawQuery = params.Encode()
+
+	req, err := http.NewRequest("GET", parsedURL.String(), nil)
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("User-Agent", sdkUserAgent)
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		DefaultLogger.Error("failed to fetch large object:", err)
+		return "", "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return "", "", fmt.Errorf("failed to fetch large object: status %d, body: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	switch format {
+	case "clob":
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to read clob response: %w", err)
+		}
+		return string(bodyBytes), "text", nil
+	case "blob":
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to read blob response: %w", err)
+		}
+		return string(bodyBytes), "binary", nil
+	default:
+		return "", "", fmt.Errorf("unsupported format: %s", format)
+	}
 }
 
 // ConcurrentScrape performs multiple scraping requests concurrently with controlled concurrency.

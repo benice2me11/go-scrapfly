@@ -250,6 +250,18 @@ type BrowserData struct {
 	SessionStorageData map[string]interface{} `json:"session_storage_data"`
 	Websockets         []interface{}          `json:"websockets"`
 	XHRCall            []interface{}          `json:"xhr_call"`
+	Attachments        []Attachment           `json:"attachments"`
+}
+
+type Attachment struct {
+	Content           string `json:"content"`
+	ContentType       string `json:"content_type"`
+	Filename          string `json:"filename"`
+	ID                string `json:"id"`
+	Size              int    `json:"size"`
+	State             string `json:"state"`
+	SuggestedFilename string `json:"suggested_filename"`
+	URL               string `json:"url"`
 }
 
 // Cookie represents an HTTP cookie.

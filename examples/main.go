@@ -310,6 +310,45 @@ func screenshot(apiKey string) {
 	fmt.Printf("saved screenshot to %s\n", filePath)
 }
 
+// downloadFile demonstrates downloading files
+func downloadFile(apiKey string) {
+	client, err := scrapfly.New(apiKey)
+	if err != nil {
+		log.Fatalf("failed to create client: %v", err)
+	}
+
+	// Build a JavaScript scenario using the scenario builder
+	scenario, err := js_scenario.New().
+		Click("button[type='submit']").
+		Wait(2000).
+		Build()
+	if err != nil {
+		log.Fatalf("failed to build scenario: %v", err)
+	}
+
+	scrapeResult, err := client.Scrape(&scrapfly.ScrapeConfig{
+		URL: "https://web-scraping.dev/file-download",
+		// enable browsers:
+		RenderJS: true,
+		// this enables more options
+		// you can wait for some element to appear:
+		WaitForSelector: "#download-btn",
+		// you can wait explicitly for N seconds
+		RenderingWait: 3000, // 3 seconds
+		// you can control the browser through scenarios:
+		// https://scrapfly.io/docs/scrape-api/javascript-scenario
+		JSScenario: scenario,
+		// or even run any custom JS code!
+	})
+	if err != nil {
+		log.Fatalf("scrape failed: %v", err)
+	}
+
+	fmt.Println("attachments:")
+	attachmentsJSON, _ := json.MarshalIndent(scrapeResult.Result.BrowserData.Attachments, "", "  ")
+	fmt.Println(string(attachmentsJSON))
+}
+
 func main() {
 	// You can enable debug logs to see more details
 	scrapfly.DefaultLogger.SetLevel(scrapfly.LevelDebug)
@@ -325,6 +364,7 @@ func main() {
 		fmt.Println("  extractionAutoExtract - Extract common web objects using Auto Extract")
 		fmt.Println("  extractionTemplates   - Extract content using Template engine")
 		fmt.Println("  screenshot            - Capture screenshots using Screenshot API")
+		fmt.Println("  downloadFile          - Download files using Browser Data Capture")
 		return
 	}
 
@@ -341,6 +381,7 @@ func main() {
 		"extractionAutoExtract": extractionAutoExtract,
 		"extractionTemplates":   extractionTemplates,
 		"screenshot":            screenshot,
+		"downloadFile":          downloadFile,
 	}
 
 	fn, exists := functions[functionName]

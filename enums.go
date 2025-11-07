@@ -31,14 +31,15 @@ const (
 	ExtractionModelStock                     ExtractionModel = "stock"
 	ExtractionModelVehicleAd                 ExtractionModel = "vehicle_ad"
 	ExtractionModelVehicleAdListing          ExtractionModel = "vehicle_ad_listing"
+	ExtractionModelNone                      ExtractionModel = ""
 )
 
 func (f ExtractionModel) Enum() []ExtractionModel {
-	return []ExtractionModel{ExtractionModelArticle, ExtractionModelEvent, ExtractionModelFoodRecipe, ExtractionModelHotel, ExtractionModelHotelListing, ExtractionModelJobListing, ExtractionModelJobPosting, ExtractionModelOrganization, ExtractionModelProduct, ExtractionModelProductListing, ExtractionModelRealEstateProperty, ExtractionModelRealEstatePropertyListing, ExtractionModelReviewList, ExtractionModelSearchEngineResults, ExtractionModelSocialMediaPost, ExtractionModelSoftware, ExtractionModelStock, ExtractionModelVehicleAd, ExtractionModelVehicleAdListing}
+	return []ExtractionModel{ExtractionModelArticle, ExtractionModelEvent, ExtractionModelFoodRecipe, ExtractionModelHotel, ExtractionModelHotelListing, ExtractionModelJobListing, ExtractionModelJobPosting, ExtractionModelOrganization, ExtractionModelProduct, ExtractionModelProductListing, ExtractionModelRealEstateProperty, ExtractionModelRealEstatePropertyListing, ExtractionModelReviewList, ExtractionModelSearchEngineResults, ExtractionModelSocialMediaPost, ExtractionModelSoftware, ExtractionModelStock, ExtractionModelVehicleAd, ExtractionModelVehicleAdListing, ExtractionModelNone}
 }
 
 func (f ExtractionModel) AnyEnum() []any {
-	return []any{ExtractionModelArticle, ExtractionModelEvent, ExtractionModelFoodRecipe, ExtractionModelHotel, ExtractionModelHotelListing, ExtractionModelJobListing, ExtractionModelJobPosting, ExtractionModelOrganization, ExtractionModelProduct, ExtractionModelProductListing, ExtractionModelRealEstateProperty, ExtractionModelRealEstatePropertyListing, ExtractionModelReviewList, ExtractionModelSearchEngineResults, ExtractionModelSocialMediaPost, ExtractionModelSoftware, ExtractionModelStock, ExtractionModelVehicleAd, ExtractionModelVehicleAdListing}
+	return []any{ExtractionModelArticle, ExtractionModelEvent, ExtractionModelFoodRecipe, ExtractionModelHotel, ExtractionModelHotelListing, ExtractionModelJobListing, ExtractionModelJobPosting, ExtractionModelOrganization, ExtractionModelProduct, ExtractionModelProductListing, ExtractionModelRealEstateProperty, ExtractionModelRealEstatePropertyListing, ExtractionModelReviewList, ExtractionModelSearchEngineResults, ExtractionModelSocialMediaPost, ExtractionModelSoftware, ExtractionModelStock, ExtractionModelVehicleAd, ExtractionModelVehicleAdListing, ExtractionModelNone}
 }
 func (f ExtractionModel) String() string {
 	if slices.Contains(f.Enum(), f) {

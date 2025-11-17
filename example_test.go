@@ -791,6 +791,220 @@ func Example_extractionAutoExtract() {
 	fmt.Println("product auto extract:")
 	productResultJSON, _ := json.MarshalIndent(productResult, "", "  ")
 	fmt.Println(string(productResultJSON))
+	// Output:scrapfly: 2025/11/17 05:22:31 [DEBUG] scraping url https://web-scraping.dev/product/1
+	// scrapfly: 2025/11/17 05:22:35 [DEBUG] scrape log url: https://scrapfly.io/dashboard/monitoring/log/XXXXXX
+	// product auto extract:
+	// {
+	//   "data": {
+	//     "aggregate_rating": {
+	//       "best_rating": 5,
+	//       "rating_value": 4.7,
+	//       "review_count": 10
+	//     },
+	//     "bidding": null,
+	//     "brand": "ChocoDelight",
+	//     "breadcrumbs": [
+	//       {
+	//         "link": "/",
+	//         "name": "Home"
+	//       },
+	//       {
+	//         "link": "/products",
+	//         "name": "Products"
+	//       },
+	//       {
+	//         "link": null,
+	//         "name": "Box of Chocolate Candy"
+	//       }
+	//     ],
+	//     "canonical_url": null,
+	//     "color": null,
+	//     "delivery": "1 Day shipping",
+	//     "description": "Indulge your sweet tooth with our Box of Chocolate Candy. Each box contains an assortment of rich, flavorful chocolates with a smooth, creamy filling. Choose from a variety of flavors including zesty orange and sweet cherry. Whether you're looking for the perfect gift or just want to treat yourself, our Box of Chocolate Candy is sure to satisfy.",
+	//     "description_markdown": "Indulge your sweet tooth with our Box of Chocolate Candy. Each box contains an assortment of rich, flavorful chocolates with a smooth, creamy filling. Choose from a variety of flavors including zesty orange and sweet cherry. Whether you're looking for the perfect gift or just want to treat yourself, our Box of Chocolate Candy is sure to satisfy.",
+	//     "identifiers": {
+	//       "ean13": null,
+	//       "gtin14": null,
+	//       "gtin8": null,
+	//       "isbn10": null,
+	//       "isbn13": null,
+	//       "ismn": null,
+	//       "issn": null,
+	//       "mpn": null,
+	//       "sku": "1",
+	//       "upc": null
+	//     },
+	//     "images": [
+	//       {
+	//         "url": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-small-1.webp"
+	//       },
+	//       {
+	//         "url": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-small-2.webp"
+	//       },
+	//       {
+	//         "url": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-small-3.webp"
+	//       },
+	//       {
+	//         "url": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-small-4.webp"
+	//       }
+	//     ],
+	//     "main_category": "Products",
+	//     "main_image": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-small-1.webp",
+	//     "name": "Box of Chocolate Candy",
+	//     "offers": [
+	//       {
+	//         "availability": "available",
+	//         "currency": "USD",
+	//         "price": 9.99,
+	//         "regular_price": 12.99
+	//       }
+	//     ],
+	//     "related_products": [
+	//       {
+	//         "availability": "available",
+	//         "description": null,
+	//         "images": [
+	//           {
+	//             "url": "https://www.web-scraping.dev/assets/products/blue-potion.webp"
+	//           }
+	//         ],
+	//         "link": "https://web-scraping.dev/product/17",
+	//         "name": "Blue Energy Potion",
+	//         "price": {
+	//           "amount": 4.99,
+	//           "currency": "USD",
+	//           "raw": "4.99"
+	//         }
+	//       },
+	//       {
+	//         "availability": "available",
+	//         "description": null,
+	//         "images": [
+	//           {
+	//             "url": "https://www.web-scraping.dev/assets/products/teal-potion.webp"
+	//           }
+	//         ],
+	//         "link": "https://web-scraping.dev/product/27",
+	//         "name": "Teal Energy Potion",
+	//         "price": {
+	//           "amount": 4.99,
+	//           "currency": "USD",
+	//           "raw": "4.99"
+	//         }
+	//       },
+	//       {
+	//         "availability": "available",
+	//         "description": null,
+	//         "images": [
+	//           {
+	//             "url": "https://www.web-scraping.dev/assets/products/orange-chocolate-box-medium-1.webp"
+	//           }
+	//         ],
+	//         "link": "https://web-scraping.dev/product/25",
+	//         "name": "Box of Chocolate Candy",
+	//         "price": {
+	//           "amount": 24.99,
+	//           "currency": "USD",
+	//           "raw": "24.99"
+	//         }
+	//       },
+	//       {
+	//         "availability": "available",
+	//         "description": null,
+	//         "images": [
+	//           {
+	//             "url": "https://www.web-scraping.dev/assets/products/hiking-boots-1.webp"
+	//           }
+	//         ],
+	//         "link": "https://web-scraping.dev/product/7",
+	//         "name": "Hiking Boots for Outdoor Adventures",
+	//         "price": {
+	//           "amount": 89.99,
+	//           "currency": "USD",
+	//           "raw": "89.99"
+	//         }
+	//       }
+	//     ],
+	//     "secondary_category": null,
+	//     "size": null,
+	//     "sizes": null,
+	//     "specifications": [
+	//       {
+	//         "name": "material",
+	//         "value": "Premium quality chocolate"
+	//       },
+	//       {
+	//         "name": "flavors",
+	//         "value": "Available in Orange and Cherry flavors"
+	//       },
+	//       {
+	//         "name": "sizes",
+	//         "value": "Available in small, medium, and large boxes"
+	//       },
+	//       {
+	//         "name": "brand",
+	//         "value": "ChocoDelight"
+	//       },
+	//       {
+	//         "name": "care instructions",
+	//         "value": "Store in a cool, dry place"
+	//       },
+	//       {
+	//         "name": "purpose",
+	//         "value": "Ideal for gifting or self-indulgence"
+	//       }
+	//     ],
+	//     "style": null,
+	//     "url": "https://web-scraping.dev/product/1",
+	//     "variants": [
+	//       {
+	//         "color": "orange",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=orange-small"
+	//       },
+	//       {
+	//         "color": "orange",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=orange-medium"
+	//       },
+	//       {
+	//         "color": "orange",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=orange-large"
+	//       },
+	//       {
+	//         "color": "cherry",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=cherry-small"
+	//       },
+	//       {
+	//         "color": "cherry",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=cherry-medium"
+	//       },
+	//       {
+	//         "color": "cherry",
+	//         "offers": [],
+	//         "sku": null,
+	//         "url": "https://web-scraping.dev/product/1?variant=cherry-large"
+	//       }
+	//     ]
+	//   },
+	//   "content_type": "application/json",
+	//   "data_quality": {
+	//     "errors": [
+	//       "breadcrumbs[2].link: Input should be a valid string",
+	//       "breadcrumbs[2].link: Input should be a valid string"
+	//     ],
+	//     "fulfilled": false,
+	//     "fulfillment_percent": 69.57
+	//   }
+	// }
 }
 
 // extractionTemplates demonstrates using extraction templates

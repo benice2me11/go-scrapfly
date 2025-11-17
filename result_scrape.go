@@ -79,7 +79,7 @@ type ExtractionResult struct {
 	// ContentType is the content type of the extracted data.
 	ContentType string `json:"content_type"`
 	// DataQuality indicates the quality/confidence of the extraction (if available).
-	DataQuality string `json:"data_quality,omitempty"`
+	DataQuality interface{} `json:"data_quality,omitempty"`
 }
 
 // errorResponse is used to unmarshal generic API errors.

@@ -10,12 +10,13 @@ import (
 type VisionDeficiencyType string
 
 const (
-	VisionDeficiencyTypeNone          VisionDeficiencyType = "none"
-	VisionDeficiencyTypeDeuteranopia  VisionDeficiencyType = "deuteranopia"
-	VisionDeficiencyTypeProtanopia    VisionDeficiencyType = "protanopia"
-	VisionDeficiencyTypeTritanopia    VisionDeficiencyType = "tritanopia"
-	VisionDeficiencyTypeAchromatopsia VisionDeficiencyType = "achromatopsia"
-	VisionDeficiencyTypeBlurredVision VisionDeficiencyType = "blurred_vision"
+	VisionDeficiencyTypeNone            VisionDeficiencyType = "none"
+	VisionDeficiencyTypeDeuteranopia    VisionDeficiencyType = "deuteranopia"
+	VisionDeficiencyTypeProtanopia      VisionDeficiencyType = "protanopia"
+	VisionDeficiencyTypeTritanopia      VisionDeficiencyType = "tritanopia"
+	VisionDeficiencyTypeAchromatopsia   VisionDeficiencyType = "achromatopsia"
+	VisionDeficiencyTypeBlurredVision   VisionDeficiencyType = "blurredVision"
+	VisionDeficiencyTypeReducedContrast VisionDeficiencyType = "reducedContrast"
 )
 
 func (f VisionDeficiencyType) Enum() []VisionDeficiencyType {

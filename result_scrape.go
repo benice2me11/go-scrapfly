@@ -112,7 +112,7 @@ type ConfigData struct {
 	Tags               []string          `json:"tags"`
 	CorrelationID      *string           `json:"correlation_id"`
 	Body               *string           `json:"body"`
-	Headers            map[string]string `json:"headers"`
+	Headers            interface{}       `json:"headers"`
 	JS                 *string           `json:"js"`
 	RenderingWait      int               `json:"rendering_wait"`
 	WaitForSelector    *string           `json:"wait_for_selector"`
@@ -143,23 +143,23 @@ type ContextData struct {
 	Debug             DebugContext `json:"debug"`
 	Env               string       `json:"env"`
 	//Fingerprint       string            `json:"fingerprint"`
-	Fingerprint      interface{}       `json:"fingerprint"`
-	Headers          map[string]string `json:"headers"`
-	IsXMLHTTPRequest bool              `json:"is_xml_http_request"`
-	Job              interface{}       `json:"job"`
-	Lang             interface{}       `json:"lang"` // []string or string
-	OS               OSContext         `json:"os"`
-	Project          string            `json:"project"`
-	Proxy            ProxyContext      `json:"proxy"`
-	Redirects        interface{}       `json:"redirects"` // []string or string
-	Retry            int               `json:"retry"`
-	Schedule         interface{}       `json:"schedule"`
-	Session          interface{}       `json:"session"`
-	Spider           interface{}       `json:"spider"`
-	Throttler        interface{}       `json:"throttler"`
-	URI              URIContext        `json:"uri"`
-	URL              string            `json:"url"`
-	Webhook          interface{}       `json:"webhook"`
+	Fingerprint      interface{}  `json:"fingerprint"`
+	Headers          interface{}  `json:"headers"`
+	IsXMLHTTPRequest bool         `json:"is_xml_http_request"`
+	Job              interface{}  `json:"job"`
+	Lang             interface{}  `json:"lang"` // []string or string
+	OS               OSContext    `json:"os"`
+	Project          string       `json:"project"`
+	Proxy            ProxyContext `json:"proxy"`
+	Redirects        interface{}  `json:"redirects"` // []string or string
+	Retry            int          `json:"retry"`
+	Schedule         interface{}  `json:"schedule"`
+	Session          interface{}  `json:"session"`
+	Spider           interface{}  `json:"spider"`
+	Throttler        interface{}  `json:"throttler"`
+	URI              URIContext   `json:"uri"`
+	URL              string       `json:"url"`
+	Webhook          interface{}  `json:"webhook"`
 }
 
 // ResultData contains the scraped content and response information.

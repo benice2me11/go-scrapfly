@@ -2,6 +2,7 @@ package scrapfly
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -147,6 +148,14 @@ func (c *Client) VerifyAPIKey() (*VerifyAPIKeyResult, error) {
 //	}
 //	fmt.Println(result.Result.Content)
 func (c *Client) Scrape(config *ScrapeConfig) (*ScrapeResult, error) {
+	return c.ScrapeWithContext(context.Background(), config)
+}
+
+// ScrapeWithContext performs a scrape request using the provided context.
+//
+// This allows the caller to cancel the underlying HTTP request (e.g. when the
+// job is aborted or times out) instead of waiting for the client's timeout.
+func (c *Client) ScrapeWithContext(ctx context.Context, config *ScrapeConfig) (*ScrapeResult, error) {
 	DefaultLogger.Debug("scraping", "url", config.URL)
 
 	if err := config.processBody(); err != nil {
@@ -166,7 +175,11 @@ func (c *Client) Scrape(config *ScrapeConfig) (*ScrapeResult, error) {
 		method = strings.ToUpper(config.Method.String())
 	}
 
-	req, err := http.NewRequest(method, endpointURL.String(), strings.NewReader(config.Body))
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, endpointURL.String(), strings.NewReader(config.Body))
 	if err != nil {
 		return nil, err
 	}
@@ -620,10 +633,10 @@ func (c *Client) createErrorFromResult(result *ScrapeResult) error {
 
 	if !result.Result.Success {
 		if result.Result.StatusCode >= 400 && result.Result.StatusCode < 500 {
-			return fmt.Errorf("%w: %s", ErrUpstreamClient, apiErr)
+			return fmt.Errorf("%w: %w", ErrUpstreamClient, apiErr)
 		}
 		if result.Result.StatusCode >= 500 {
-			return fmt.Errorf("%w: %s", ErrUpstreamServer, apiErr)
+			return fmt.Errorf("%w: %w", ErrUpstreamServer, apiErr)
 		}
 	}
 
@@ -631,18 +644,18 @@ func (c *Client) createErrorFromResult(result *ScrapeResult) error {
 		resource := parts[1]
 		switch resource {
 		case "SCRAPE":
-			return fmt.Errorf("%w: %s", ErrScrapeFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrScrapeFailed, apiErr)
 		case "PROXY":
-			return fmt.Errorf("%w: %s", ErrProxyFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrProxyFailed, apiErr)
 		case "ASP":
-			return fmt.Errorf("%w: %s", ErrASPBypassFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrASPBypassFailed, apiErr)
 		case "SCHEDULE":
-			return fmt.Errorf("%w: %s", ErrScheduleFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrScheduleFailed, apiErr)
 		case "WEBHOOK":
-			return fmt.Errorf("%w: %s", ErrWebhookFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrWebhookFailed, apiErr)
 		case "SESSION":
-			return fmt.Errorf("%w: %s", ErrSessionFailed, apiErr)
+			return fmt.Errorf("%w: %w", ErrSessionFailed, apiErr)
 		}
 	}
-	return fmt.Errorf("%w: %s", ErrUnhandledAPIResponse, apiErr)
+	return fmt.Errorf("%w: %w", ErrUnhandledAPIResponse, apiErr)
 }

@@ -1,12 +1,16 @@
 package scrapfly
 
 import (
+	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,6 +29,10 @@ func fetchWithRetry(client *http.Client, req *http.Request, retries int, delay t
 	var lastErr error
 
 	for attempt := 0; attempt < retries; attempt++ {
+		if ctxErr := req.Context().Err(); ctxErr != nil {
+			return nil, ctxErr
+		}
+
 		// We need to be able to re-read the body on retries
 		var bodyReader io.ReadCloser
 		if req.Body != nil {
@@ -40,23 +48,113 @@ func fetchWithRetry(client *http.Client, req *http.Request, retries int, delay t
 
 		resp, err := client.Do(req)
 		if err != nil {
+			if ctxErr := req.Context().Err(); ctxErr != nil {
+				return nil, ctxErr
+			}
 			lastErr = err
 			DefaultLogger.Debug("request failed:", err, "retrying...")
-			time.Sleep(delay)
+			if attempt+1 < retries && !sleepWithContext(req.Context(), delay) {
+				return nil, req.Context().Err()
+			}
 			continue
 		}
 
 		if resp.StatusCode >= 500 && resp.StatusCode < 600 {
+			bodyBytes, readErr := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 			resp.Body.Close() // Close body to prevent resource leaks
-			lastErr = &APIError{Message: "server error", HTTPStatusCode: resp.StatusCode}
+			if readErr != nil {
+				lastErr = &APIError{Message: "server error", HTTPStatusCode: resp.StatusCode}
+			} else {
+				lastErr = apiErrorFromHTTPResponse(resp, bodyBytes)
+			}
 			DefaultLogger.Debug("request failed with status", resp.StatusCode, "retrying...")
-			time.Sleep(delay)
+			if attempt+1 < retries && !sleepWithContext(req.Context(), delay) {
+				return nil, req.Context().Err()
+			}
 			continue
 		}
 
 		return resp, nil
 	}
 	return nil, lastErr
+}
+
+func sleepWithContext(ctx context.Context, delay time.Duration) bool {
+	if delay <= 0 {
+		return true
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return false
+	case <-timer.C:
+		return true
+	}
+}
+
+func apiErrorFromHTTPResponse(resp *http.Response, body []byte) *APIError {
+	statusCode := 0
+	if resp != nil {
+		statusCode = resp.StatusCode
+	}
+
+	var result ScrapeResult
+	if len(body) > 0 {
+		if err := json.Unmarshal(body, &result); err == nil {
+			if result.Result.Error != nil {
+				apiErr := &APIError{
+					APIResponse:      &result,
+					HTTPStatusCode:   statusCode,
+					Message:          result.Result.Error.Message,
+					Code:             result.Result.Error.Code,
+					DocumentationURL: result.Result.Error.DocURL,
+				}
+				setRetryAfterFromHeader(apiErr, resp)
+				return apiErr
+			}
+		}
+	}
+
+	var errResp errorResponse
+	if len(body) > 0 {
+		_ = json.Unmarshal(body, &errResp)
+	}
+	msg := strings.TrimSpace(errResp.Message)
+	if msg == "" {
+		msg = fmt.Sprintf("API returned status %d", statusCode)
+	}
+
+	apiErr := &APIError{
+		Message:        msg,
+		HTTPStatusCode: statusCode,
+		Code:           strings.TrimSpace(errResp.Code),
+	}
+	setRetryAfterFromHeader(apiErr, resp)
+	return apiErr
+}
+
+func setRetryAfterFromHeader(apiErr *APIError, resp *http.Response) {
+	if apiErr == nil || resp == nil {
+		return
+	}
+	ra := strings.TrimSpace(resp.Header.Get("Retry-After"))
+	if ra == "" {
+		return
+	}
+
+	if secs, err := strconv.Atoi(ra); err == nil && secs >= 0 {
+		apiErr.RetryAfterMs = secs * 1000
+		return
+	}
+	if t, err := http.ParseTime(ra); err == nil {
+		ms := int(time.Until(t).Milliseconds())
+		if ms < 0 {
+			ms = 0
+		}
+		apiErr.RetryAfterMs = ms
+	}
 }
 
 // ValidateExclusiveFields checks a struct for fields marked with the "exclusive" tag

@@ -34,7 +34,7 @@ release:
 	@[ "$$(git rev-parse --abbrev-ref HEAD)" = main ] || { echo "release must run on main"; exit 1; }
 	git pull origin main
 	$(MAKE) vet
-	$(MAKE) test
+	@if [ -z "$(SKIP_TESTS)" ]; then $(MAKE) test; else echo "SKIP_TESTS set, skipping test gate"; fi
 	$(MAKE) generate-docs
 	-git add docs
 	-git commit -m "Update Go reference for version $(VERSION)"

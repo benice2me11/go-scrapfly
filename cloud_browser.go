@@ -25,6 +25,14 @@ type CloudBrowserConfig struct {
 	ProxyPool    string   `json:"proxy_pool,omitempty"`
 	OS           string   `json:"os,omitempty"`
 	Country      string   `json:"country,omitempty"`
+	// Lang is the browser UI language — the singular navigator.language base
+	// tag (e.g. "en"). Empty means the server derives it from Country.
+	Lang string `json:"lang,omitempty"`
+	// Languages is the ordered language preference list driving
+	// navigator.languages and the q-weighted Accept-Language header
+	// (e.g. []string{"fr-FR", "fr", "en-US"}). Sent comma-joined; capped
+	// server-side at 3 entries.
+	Languages    []string `json:"languages,omitempty"`
 	Session      string   `json:"session,omitempty"`
 	Timeout      int      `json:"timeout,omitempty"` // Session timeout in seconds (default 900)
 	BlockImages  bool     `json:"block_images,omitempty"`
@@ -137,6 +145,12 @@ func (c *Client) CloudBrowser(config *CloudBrowserConfig) string {
 		}
 		if config.Country != "" {
 			params.Set("country", config.Country)
+		}
+		if config.Lang != "" {
+			params.Set("lang", config.Lang)
+		}
+		if len(config.Languages) > 0 {
+			params.Set("languages", strings.Join(config.Languages, ","))
 		}
 		if config.Session != "" {
 			params.Set("session", config.Session)
